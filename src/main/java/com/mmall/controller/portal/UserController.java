@@ -42,7 +42,7 @@ public class UserController {
         return iUserService.register(user);
     }
 
-    @RequestMapping(value = "check_valid",method = RequestMethod.POST)
+    @RequestMapping(value = "check_valid.do",method = RequestMethod.POST)
     @ResponseBody
     public ServerResponse<String> checkValid(String str, String type) {
         return iUserService.checkValid(str, type);
@@ -107,7 +107,8 @@ public class UserController {
         }
         return serverResponse;
     }
-
+    @RequestMapping(value = "get_information.do",method = RequestMethod.POST)
+    @ResponseBody
     public ServerResponse<User> getInformation(HttpSession session) {
         User currentUser = (User) session.getAttribute(Const.USERNAME);
         if (currentUser == null) {

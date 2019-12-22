@@ -48,11 +48,11 @@ public class UserServiceImpl implements IUserService{
 //            return ServerResponse.createByErrorMessage("该邮箱已被注册");
 //        }
         ServerResponse<String> checkValid
-                = checkValid(user.getUsername(), Const.USERNAME);
+                = this.checkValid(user.getUsername(), Const.USERNAME);
         if (!checkValid.isSuccess()) {
             return checkValid;
         }
-        checkValid = checkValid(user.getEmail(),Const.EMAIL);
+        checkValid = this.checkValid(user.getEmail(),Const.EMAIL);
         if (!checkValid.isSuccess()) {
             return checkValid;
         }
@@ -69,15 +69,15 @@ public class UserServiceImpl implements IUserService{
     @Override
     public ServerResponse<String> checkValid(String str, String type) {
         if (StringUtils.isNotBlank(type)) {
-            if (Const.USERNAME == type) {
+            if (Const.USERNAME.equals(type)) {
                 int countResult = userMapper.checkUsername(str);
-                if (countResult == 0) {
+                if (countResult > 0) {
                     return ServerResponse.createByErrorMessage("用户名已存在");
                 }
             }
-            if (Const.EMAIL == type) {
+            if (Const.EMAIL.equals(type)) {
                 int countResult = userMapper.checkEmail(str);
-                if (countResult == 0) {
+                if (countResult > 0) {
                     return ServerResponse.createByErrorMessage("email已存在");
                 }
             }
