@@ -3,7 +3,9 @@ package com.mmall.service.impl;
 import com.mmall.common.Const;
 import com.mmall.common.ServerResponse;
 import com.mmall.common.TokenCache;
+import com.mmall.dao.CategoryMapper;
 import com.mmall.dao.UserMapper;
+import com.mmall.pojo.Category;
 import com.mmall.pojo.User;
 import com.mmall.service.IUserService;
 import com.mmall.util.MD5Util;
@@ -24,18 +26,18 @@ public class UserServiceImpl implements IUserService {
     public ServerResponse<User> login(String username, String password) {
 
         int resultCount = userMapper.checkUsername(username);
-        if(resultCount == 0 ){
+        if (resultCount == 0) {
             return ServerResponse.createByErrorMessage("用户名不存在");
         }
 
         String md5Password = MD5Util.MD5EncodeUtf8(password);
-        User user  = userMapper.selectLogin(username,md5Password);
-        if(user == null){
+        User user = userMapper.selectLogin(username, md5Password);
+        if (user == null) {
             return ServerResponse.createByErrorMessage("密码错误");
         }
 
         user.setPassword(org.apache.commons.lang3.StringUtils.EMPTY);
-        return ServerResponse.createBySuccess("登录成功",user);
+        return ServerResponse.createBySuccess("登录成功", user);
     }
 
     @Override
@@ -100,10 +102,10 @@ public class UserServiceImpl implements IUserService {
         if (response.isSuccess()) {
             return ServerResponse.createByErrorMessage("用户不存在");
         }
-        int countResult = userMapper.checkAnswer(username, question,answer);
+        int countResult = userMapper.checkAnswer(username, question, answer);
         if (countResult > 0) {
             String forgetToken = UUID.randomUUID().toString();
-            TokenCache.setKey(TokenCache.TOKEN_PREFIX + username,forgetToken);
+            TokenCache.setKey(TokenCache.TOKEN_PREFIX + username, forgetToken);
             return ServerResponse.createBySuccess(forgetToken);
         }
         return ServerResponse.createByErrorMessage("问题答案错误");
@@ -118,10 +120,10 @@ public class UserServiceImpl implements IUserService {
             return ServerResponse.createByErrorMessage("用户不存在");
         }
         String token = TokenCache.getKey(TokenCache.TOKEN_PREFIX + username);
-        if (StringUtils.isNotBlank(token)) {
+        if (StringUtils.isBlank(token)) {
             return ServerResponse.createByErrorMessage("token无效或者过期");
         }
-        if (StringUtils.equals(forgetToken, token)) {
+        if (StringUtils.equals(token, forgetToken)) {
             String password = MD5Util.MD5EncodeUtf8(passwordNew);
             int countResult = userMapper.updatePasswordByUsername(username, password);
             if (countResult > 0) {
@@ -135,8 +137,17 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public ServerResponse<String> resetPass(User user, String passwordOld, String passwordNew) {
-        int countResult = userMapper.checkPassword(MD5Util.MD5EncodeUtf8(passwordOld),user.getId());
-        return null;
+        int countResult = userMapper.checkPassword(MD5Util.MD5EncodeUtf8(passwordOld), user.getId());
+        if (countResult == 0) {
+            return ServerResponse.createBySuccess("旧密码错误");
+        }
+        String md5Password = MD5Util.MD5EncodeUtf8(passwordNew);
+        user.setPassword(md5Password);
+        countResult = userMapper.updateByPrimaryKeySelective(user);
+        if (countResult > 0) {
+            return ServerResponse.createBySuccess("密码更新成功");
+        }
+        return ServerResponse.createByErrorMessage("密码更新失败");
     }
 
     public ServerResponse<User> updateInformation(User user) {
@@ -153,7 +164,7 @@ public class UserServiceImpl implements IUserService {
 
         int countResult01 = userMapper.updateByPrimaryKeySelective(updateUser);
         if (countResult01 > 0) {
-            return ServerResponse.createBySuccess("更新成功",updateUser);
+            return ServerResponse.createBySuccess("更新成功", updateUser);
         }
         return ServerResponse.createByErrorMessage("更新失败");
     }
@@ -166,4 +177,15 @@ public class UserServiceImpl implements IUserService {
         user.setPassword(StringUtils.EMPTY);
         return ServerResponse.createBySuccess(user);
     }
+
+    public ServerResponse<String> checkAdminRole(User user) {
+        if (user != null && user.getRole().intValue() == Const.Role.ROLE_ADMIN) {
+            return ServerResponse.createBySuccess();
+        }
+        return ServerResponse.createByError();
+
+    }
+
+
+
 }
