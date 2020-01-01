@@ -12,18 +12,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
-@RequestMapping(value = "/detail.do/")
+@RequestMapping(value = "//product//")
 public class ProductController {
 
     @Autowired
     private IProductService iProductService;
-    @RequestMapping(value = "detail", method = RequestMethod.POST)
+    @RequestMapping(value = "detail.do", method = RequestMethod.POST)
     @ResponseBody
     public ServerResponse detail(Integer productId) {
        return iProductService.productDetail(productId);
     }
 
-
+    @RequestMapping(value = "list.do", method = RequestMethod.POST)
+    @ResponseBody
     public ServerResponse<PageInfo> list(Integer categoryId, String keyword,
                                          @RequestParam(value = "pageNum", defaultValue = "1")Integer pageNum,
                                          @RequestParam(value = "pageSize",defaultValue = "10") Integer pageSize,
