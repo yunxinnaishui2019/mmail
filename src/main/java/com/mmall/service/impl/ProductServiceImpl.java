@@ -1,31 +1,29 @@
 package com.mmall.service.impl;
 
+import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.mmall.common.Const;
 import com.mmall.common.ResponseCode;
 import com.mmall.common.ServerResponse;
-import com.mmall.dao.CartMapper;
 import com.mmall.dao.CategoryMapper;
 import com.mmall.dao.ProductMapper;
 import com.mmall.pojo.Category;
 import com.mmall.pojo.Product;
 import com.mmall.service.ICategoryService;
 import com.mmall.service.IProductService;
-
 import com.mmall.util.DateTimeUtil;
 import com.mmall.util.PropertiesUtil;
+import com.mmall.vo.ProductDetailVo;
 import com.mmall.vo.ProductListVo;
-import net.sf.jsqlparser.schema.Server;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.mmall.vo.ProductDetailVo;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+
 
 @Service
 public class ProductServiceImpl implements IProductService {
@@ -174,7 +172,7 @@ public class ProductServiceImpl implements IProductService {
             return ServerResponse.createBySuccess("产品已下架或者删除");
         }
         if (product.getStatus() != Const.ProductStatusEnum.ON_SALE.getCode()) {
-            return ServerResponse.createByErrorMessage("商品已下架或者删除")
+            return ServerResponse.createByErrorMessage("商品已下架或者删除");
         }
         ProductListVo productListVo = assembleProductListVo(product);
         return ServerResponse.createBySuccess(productListVo);
@@ -206,14 +204,18 @@ public class ProductServiceImpl implements IProductService {
                 PageHelper.orderBy(orderByArray[0] + " " + orderByArray[1]);
             }
         }
-        List<Product> productList = productMapper.selectByNameAndCategoryIds(categoryIdList, keyword);
+        List<Product> productList = productMapper.selectByNameAndCategoryIds(
+                categoryIdList.size()==0?null:categoryIdList,
+                StringUtils.isBlank(keyword)?null:keyword);
+
         List<ProductListVo> productListVoList = Lists.newArrayList();
+
         for (Product product : productList) {
             ProductListVo productListVo = assembleProductListVo(product);
             productListVoList.add(productListVo);
         }
 
-        PageInfo<Product> pageInfo = new PageInfo<>(productList);
+        PageInfo pageInfo = new PageInfo<>(productList);
         pageInfo.setList(productListVoList);
         return ServerResponse.createBySuccess(pageInfo);
 
