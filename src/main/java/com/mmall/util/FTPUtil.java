@@ -25,7 +25,7 @@ public class FTPUtil {
     }
 
     public static boolean uploadFile(List<File> fileList) throws IOException{
-        FTPUtil ftpUtil = new FtpClient(ftpIp,21,ftpUser,ftpPass);
+        FTPUtil ftpUtil = new FTPUtil(ftpIp,21,ftpUser,ftpPass);
         logger.info("开始连接ftp服务器");
         boolean result = ftpUtil.uploadFile("img",fileList);
         logger.info("开始连接ftp服务器,结束上传,上传结果:{}");
@@ -44,7 +44,7 @@ public class FTPUtil {
                 ftpClient.enterLocalPassiveMode();
                 for (File fileItem : fileList) {
                     fis = new FileInputStream(fileItem);
-                    ftpClient.storeFile(fileItem.getName());
+                    ftpClient.storeFile(fileItem.getName(),fis);
                 }
             } catch (IOException e) {
                 logger.error("上传文件异常", e);
