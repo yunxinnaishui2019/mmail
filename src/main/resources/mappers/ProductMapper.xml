@@ -179,14 +179,14 @@
   <select id="selectList" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List"></include>
-    from mmall_user
+    from mmall_product
     order by asc;
   </select>
 
   <select id="selectByNameAndProductId" resultMap="BaseResultMap" parameterType="map">
     select
     <include refid="Base_Column_List"></include>
-    from mmall_user
+    from mmall_product
     <where>
       <if test="productName != null "></if>
       and name like #{productName}
@@ -198,14 +198,21 @@
   <select id="selectByNameAndCategoryIds" resultMap="BaseResultMap" parameterType="map">
     select
     <include refid="Base_Column_List"></include>
-    from mmall_user;
+    from mmall_product;
     where statu = 1
     <if test="keyword != null">
       and name like #{keyword}
     </if>
     and category_id in
     <foreach collection="categoryIdList" index="index" open="(" close=")" item="item">
-    #{item}
+      #{item}
     </foreach>
+  </select>
+  <select id="selectProductByUserIdAndProductId" parameterType="map" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"></include>
+    from mmall_product
+    where user_id = #{userId}
+    and product_id = #{productId}
   </select>
 </mapper>
